@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aerodrome Quiz</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #dbe3ee;
+      --primary: #023047;
+      --accent: #219ebc;
+      --accent2: #8ecae6;
+      --warn: #ffb703;
+      --danger: #fb8500;
+      --okbg: #ecfdf5;
+      --okbd: #86efac;
+      --badbg: #fff7ed;
+      --badbd: #fdba74;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #f9fbfd 0%, #eef5fb 100%);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 18px 80px;
+    }
+    .hero {
+      background: linear-gradient(135deg, var(--primary), #0b4d67);
+      color: white;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 14px 36px rgba(2, 48, 71, 0.18);
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+    .hero p {
+      margin: 0;
+      color: rgba(255,255,255,0.9);
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0 24px;
+    }
+    .pill {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+    .pill .label { color: var(--muted); font-size: 0.9rem; }
+    .pill .value { font-size: 1.3rem; font-weight: 700; margin-top: 4px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+    .qhead {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .qnum {
+      font-size: 0.95rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 4px;
+    }
+    .qtext {
+      font-size: 1.08rem;
+      font-weight: 600;
+    }
+    .badge {
+      white-space: nowrap;
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: #e6f6fb;
+      color: #0c5468;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .options {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .option {
+      border: 1px solid var(--line);
+      background: #fbfdff;
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      transition: 0.15s ease;
+      cursor: pointer;
+    }
+    .option:hover { border-color: var(--accent2); background: #f5fbfe; }
+    .option input { margin-top: 4px; }
+    .letter {
+      min-width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: #edf2f7;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #334155;
+    }
+    .btnrow {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 16px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .check {
+      background: var(--primary);
+      color: white;
+    }
+    .reset {
+      background: #eef2f7;
+      color: #334155;
+    }
+    .feedback {
+      margin-top: 14px;
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: none;
+    }
+    .feedback.correct {
+      display: block;
+      background: var(--okbg);
+      border: 1px solid var(--okbd);
+    }
+    .feedback.incorrect {
+      display: block;
+      background: var(--badbg);
+      border: 1px solid var(--badbd);
+    }
+    .feedback strong { display: inline-block; margin-bottom: 4px; }
+    .imgbox {
+      margin: 8px 0 18px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 20px;
+      padding: 12px;
+    }
+    .imgbox img {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+    }
+    .imgcap { font-size: 0.92rem; color: var(--muted); margin-top: 8px; }
+    .input-answer {
+      width: 100%;
+      max-width: 280px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+    .result {
+      position: sticky;
+      bottom: 14px;
+      z-index: 10;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px 16px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-top: 24px;
+    }
+    .section-title {
+      margin: 28px 0 14px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    @media (max-width: 720px) {
+      .summary { grid-template-columns: 1fr; }
+      .qhead { flex-direction: column; }
+      .result { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Aerodrome Quiz</h1>
+      <p>35 questions • instant feedback • includes the runway declared distances figure for Questions 21–28</p>
+    </section>
+
+    <section class="summary">
+      <div class="pill"><div class="label">Total Questions</div><div class="value">35</div></div>
+      <div class="pill"><div class="label">Scored</div><div class="value" id="answeredCount">0 / 35</div></div>
+      <div class="pill"><div class="label">Current Score</div><div class="value" id="scoreValue">0</div></div>
+    </section>
+
+    <div id="quiz"></div>
+
+    <div class="result">
+      <div><strong>Progress:</strong> <span id="progressText">0 of 35 checked</span></div>
+      <div class="btnrow" style="margin-top:0;">
+        <button class="check" onclick="checkAll()">Check all unanswered</button>
+        <button class="reset" onclick="resetQuiz()">Reset quiz</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const diagramPath = 'aerodrome_q21_28_diagram.jpg';
+
+const questions = [
+  {
+    type: 'mcq',
+    number: 1,
+    text: 'A defined area on land or water (including any buildings, installations and equipment) intended to be used either wholly or in part for the arrival, departure and surface movement of aircraft. This is the definition of ....',
+    options: ['Aerodrome', 'Airport', 'Seaport', 'Airway'],
+    answer: 0,
+    explanation: 'Aerodrome is the broad ICAO term for an area used for the arrival, departure, and surface movement of aircraft.'
+  },
+  {
+    type: 'mcq',
+    number: 2,
+    text: '“A defined rectangular area on the ground or water under the control of the appropriate authority, selected or prepared as a suitable area over which an aeroplane may make a portion of its initial climb to a specified height.” is a definition of ....',
+    options: ['Stopway', 'Clearway', 'Runway strip', 'Runway end safety area'],
+    answer: 1,
+    explanation: 'That wording is the definition of a clearway.'
+  },
+  {
+    type: 'mcq',
+    number: 3,
+    text: 'Location indicator. A four-letter code group formulated in accordance with rules prescribed by ICAO and assigned to the location of an ....',
+    options: ['aerodrome', 'aeronautical fixed station', 'international NOTAM office', 'airport'],
+    answer: 1,
+    explanation: 'An ICAO location indicator is assigned to the location of an aeronautical fixed station.'
+  },
+  {
+    type: 'mcq',
+    number: 4,
+    text: 'A defined area, on a land aerodrome, intended to accommodate aircraft for purposes of loading or unloading passengers, mail or cargo, fuelling, parking or maintenance. This is the definition of ....',
+    options: ['Apron', 'Ramp', 'Bay', 'Gate'],
+    answer: 0,
+    explanation: 'Apron is the correct ICAO term.'
+  },
+  {
+    type: 'mcq',
+    number: 5,
+    text: 'A defined rectangular area on a land aerodrome prepared for the landing and take-off of aircraft. This is the definition of ....',
+    options: ['Runway', 'Taxiway', 'Apron', 'Service Road'],
+    answer: 0,
+    explanation: 'That is the definition of a runway.'
+  },
+  {
+    type: 'mcq',
+    number: 6,
+    text: 'A runway designation marking shall be the whole number nearest the one-tenth of the magnetic north when viewed from the direction of approach. If the bearing of a runway is 086°, the runway designation marking shall be ....',
+    options: ['RWY 06', 'RWY 07', 'RWY 08', 'RWY 09'],
+    answer: 3,
+    explanation: '086° rounds to 09 when expressed as the nearest tenth of magnetic bearing divided by 10.'
+  },
+  {
+    type: 'mcq',
+    number: 7,
+    text: 'Runway markings shall be painted in ....',
+    options: ['black', 'white', 'yellow', 'blue'],
+    answer: 1,
+    explanation: 'Runway markings are white.'
+  },
+  {
+    type: 'mcq',
+    number: 8,
+    text: 'Stopway. A defined rectangular area on the ground at the end of take-off run available, prepared as a suitable area in which an aircraft can be stopped in the case of ....',
+    options: ['an abandoned take-off', 'successful take-off', 'short field take-off', 'None of above'],
+    answer: 0,
+    explanation: 'A stopway is intended for stopping an aircraft in the case of an abandoned take-off.'
+  },
+  {
+    type: 'mcq',
+    number: 9,
+    text: 'Chevron markings are used to show pavement areas aligned with the runway that are NOT useable for takeoff, landing or taxi. Chevrons are in ....',
+    options: ['white', 'yellow', 'black', 'blue'],
+    answer: 1,
+    explanation: 'Chevrons are yellow.'
+  },
+  {
+    type: 'mcq',
+    number: 10,
+    text: 'A defined area on a land aerodrome adjacent to a runway for the purpose of completing a 180-degree turn on a runway. This is the definition of ....',
+    options: ['Taxiway', 'Threshold', 'Stopway', 'Runway turn pad'],
+    answer: 3,
+    explanation: 'That is a runway turn pad.'
+  },
+  {
+    type: 'mcq',
+    number: 11,
+    text: 'Runway-holding position. A designated position intended to protect a runway or an ILS/MLS critical/sensitive area at which taxiing aircraft and vehicles shall stop and hold, unless otherwise authorized by the ....',
+    options: ['aerodrome control tower', 'apron control tower', 'approach control unit', 'area control center'],
+    answer: 0,
+    explanation: 'The stop-and-hold requirement is unless otherwise authorized by the aerodrome control tower.'
+  },
+  {
+    type: 'mcq',
+    number: 12,
+    text: 'A runway centre line marking shall be provided on a paved runway and located .... of runway.',
+    options: ['along the centre line', 'at the beginning', 'at the end', 'at the middle'],
+    answer: 0,
+    explanation: 'Runway centre line markings are located along the centre line.'
+  },
+  {
+    type: 'mcq',
+    number: 13,
+    text: 'A defined path on a land aerodrome established for the taxiing of aircraft and intended to provide a link between one part of the aerodrome and another. This is the definition of ....',
+    options: ['Runway', 'Taxiway', 'Stopway', 'Clearway'],
+    answer: 1,
+    explanation: 'That is the definition of a taxiway.'
+  },
+  {
+    type: 'mcq',
+    number: 14,
+    text: 'Taxiway markings must be provided on all paved taxiways. Taxiway markings shall be painted in ....',
+    options: ['black', 'white', 'yellow', 'blue'],
+    answer: 2,
+    explanation: 'Taxiway markings are yellow.'
+  },
+  {
+    type: 'mcq',
+    number: 15,
+    text: 'A .... marking must consist of two continuous 0.15 m wide yellow lines, spaced 0.15 m apart.',
+    options: ['Taxiway centre line', 'Taxiway edge', 'Taxiway strip', 'None of above'],
+    answer: 1,
+    explanation: 'Taxiway edge markings are shown as two continuous yellow lines.'
+  },
+  {
+    type: 'mcq',
+    number: 16,
+    text: 'Where shall be the location of aerodrome reference point (ARP)?',
+    options: ['At the middle of the runway center line', 'At the prominent point along the longest runway center line', 'Near the first intersection of runway with taxiway', 'Near the initial or planned geometric center of the aerodrome'],
+    answer: 3,
+    explanation: 'The ARP is located near the initial or planned geometric center of the aerodrome.'
+  },
+  {
+    type: 'mcq',
+    number: 17,
+    text: 'A mandatory instruction sign shall be provided to identify a location beyond which an aircraft taxiing or vehicle .... unless authorized by the aerodrome control tower.',
+    options: ['shall proceed', 'shall stop', 'shall reduce the speed', 'shall increase the speed'],
+    answer: 1,
+    explanation: 'Mandatory instruction signs indicate a point beyond which the aircraft or vehicle must stop unless authorized.'
+  },
+  {
+    type: 'mcq',
+    number: 18,
+    text: 'Information marking. An inscription in ...., when it replaces or supplements a location sign; and an inscription in ...., when it replaces or supplements a direction or destination sign.',
+    options: ['yellow / white', 'black / white', 'black / yellow', 'yellow / black'],
+    answer: 3,
+    explanation: 'For information signs: yellow on black when replacing/supplementing a location sign, and black on yellow when replacing/supplementing a direction or destination sign.'
+  },
+  {
+    type: 'mcq',
+    number: 19,
+    text: 'According to Global Reporting Format (GRF), the runway condition report (RCR) will be reported beginning from ....',
+    options: ['lower runway designator', 'higher runway designator', 'active runway', 'prevailing wind'],
+    answer: 0,
+    explanation: 'RCR reporting begins from the lower runway designator.'
+  },
+  {
+    type: 'mcq',
+    number: 20,
+    text: 'An aerodrome shall be equipped with at least .... wind direction indicator(s).',
+    options: ['1', '2', '3', '4'],
+    answer: 0,
+    explanation: 'At least one wind direction indicator is required.'
+  },
+  {
+    type: 'input',
+    number: 21,
+    sectionIntro: true,
+    text: 'Using the figure, enter the TORA for RWY 09.',
+    answer: '2000',
+    accept: ['2000', '2,000', '2000m', '2000 m', '2,000m', '2,000 m'],
+    explanation: 'RWY 09 TORA uses the full runway length available for take-off: 2,000 m.'
+  },
+  {
+    type: 'input',
+    number: 22,
+    text: 'Using the figure, enter the ASDA for RWY 09.',
+    answer: '2300',
+    accept: ['2300', '2,300', '2300m', '2300 m', '2,300m', '2,300 m'],
+    explanation: 'RWY 09 ASDA = TORA 2,000 m + right stopway 300 m = 2,300 m.'
+  },
+  {
+    type: 'input',
+    number: 23,
+    text: 'Using the figure, enter the TODA for RWY 09.',
+    answer: '2580',
+    accept: ['2580', '2,580', '2580m', '2580 m', '2,580m', '2,580 m'],
+    explanation: 'RWY 09 TODA = TORA 2,000 m + right clearway 580 m = 2,580 m.'
+  },
+  {
+    type: 'input',
+    number: 24,
+    text: 'Using the figure, enter the LDA for RWY 09.',
+    answer: '1850',
+    accept: ['1850', '1,850', '1850m', '1850 m', '1,850m', '1,850 m'],
+    explanation: 'RWY 09 LDA excludes the 150 m displaced threshold, so 2,000 m - 150 m = 1,850 m.'
+  },
+  {
+    type: 'input',
+    number: 25,
+    text: 'Using the figure, enter the TORA for RWY 27.',
+    answer: '2000',
+    accept: ['2000', '2,000', '2000m', '2000 m', '2,000m', '2,000 m'],
+    explanation: 'RWY 27 TORA is also 2,000 m.'
+  },
+  {
+    type: 'input',
+    number: 26,
+    text: 'Using the figure, enter the ASDA for RWY 27.',
+    answer: '2060',
+    accept: ['2060', '2,060', '2060m', '2060 m', '2,060m', '2,060 m'],
+    explanation: 'RWY 27 ASDA = TORA 2,000 m + left stopway 60 m = 2,060 m.'
+  },
+  {
+    type: 'input',
+    number: 27,
+    text: 'Using the figure, enter the TODA for RWY 27.',
+    answer: '2350',
+    accept: ['2350', '2,350', '2350m', '2350 m', '2,350m', '2,350 m'],
+    explanation: 'RWY 27 TODA = TORA 2,000 m + left clearway 350 m = 2,350 m.'
+  },
+  {
+    type: 'input',
+    number: 28,
+    text: 'Using the figure, enter the LDA for RWY 27.',
+    answer: '2000',
+    accept: ['2000', '2,000', '2000m', '2000 m', '2,000m', '2,000 m'],
+    explanation: 'RWY 27 LDA is 2,000 m because the threshold for RWY 27 is not displaced.'
+  },
+  {
+    type: 'mcq',
+    number: 29,
+    text: 'PCN 80/R/B/W/T, what does the letter “T” indicate?',
+    options: ['Rigid pavement', 'Medium strength subgrade', 'There is no tire pressure limitation', 'The bearing strength has been assessed by technical evaluation'],
+    answer: 3,
+    explanation: 'In the PCN code, T means the pavement bearing strength has been assessed by technical evaluation.'
+  },
+  {
+    type: 'mcq',
+    number: 30,
+    text: 'Runway center line lights shall be provided on a ....',
+    options: ['Precision approach runway category I', 'Precision approach runway category II', 'Precision approach runway category III', 'Precision approach runway category II and III'],
+    answer: 3,
+    explanation: 'Runway center line lights are provided for precision approach runway category II and III.'
+  },
+  {
+    type: 'mcq',
+    number: 31,
+    text: 'The aerodrome beacon shall show either coloured flashes alternating with white flashes or white flashes only. Where used, the coloured flashes emitted by beacons at land aerodromes shall be ....',
+    options: ['blue', 'green', 'yellow', 'amber'],
+    answer: 1,
+    explanation: 'At land aerodromes, the coloured flashes are green.'
+  },
+  {
+    type: 'mcq',
+    number: 32,
+    text: 'What is the difference between precision approach lighting system category I and II?',
+    options: ['No different', 'Category II is longer than Category I', 'Category II is brighter than Category I', 'The inner 300 m from threshold of Category II has red side row barrette and two crossbars'],
+    answer: 3,
+    explanation: 'Category II includes additional lighting features in the inner 300 m, including red side row barrettes and crossbars.'
+  },
+  {
+    type: 'mcq',
+    number: 33,
+    text: 'According to PAPI, the glide path indications are as two red and two white when the aircraft is ....',
+    options: ['slightly high', 'slightly low', 'significantly high', 'on proper glide path angle of approach'],
+    answer: 3,
+    explanation: 'Two white and two red means the aircraft is on the correct glide path.'
+  },
+  {
+    type: 'mcq',
+    number: 34,
+    text: 'Flags used to mark mobile objects such as a vehicle ....',
+    options: ['shall be in the shape of a triangular', 'shall consist of a chequered pattern', 'shall be in the form of longitudinal strips', 'shall have a length of not less than 3.6 m'],
+    answer: 1,
+    explanation: 'Flags used to mark mobile objects such as vehicles shall consist of a chequered pattern.'
+  },
+  {
+    type: 'mcq',
+    number: 35,
+    text: 'Taxiway edge lights shall be fixed lights showing .... to provide guidance to a pilot taxiing in either direction.',
+    options: ['blue', 'green', 'yellow', 'red'],
+    answer: 0,
+    explanation: 'Taxiway edge lights are blue.'
+  }
+];
+
+let score = 0;
+let checkedCount = 0;
+const state = {};
+
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function renderQuiz() {
+  const quiz = document.getElementById('quiz');
+  quiz.innerHTML = '';
+
+  questions.forEach((q, idx) => {
+    if (q.number === 21) {
+      const section = document.createElement('div');
+      section.className = 'section-title';
+      section.textContent = 'Questions 21–28: Declared distances';
+      quiz.appendChild(section);
+
+      const imgbox = document.createElement('div');
+      imgbox.className = 'card';
+      imgbox.innerHTML = `
+        <div class="imgbox">
+          <img src="${diagramPath}" alt="Runway declared distances figure for questions 21 to 28">
+          <div class="imgcap">Use this figure to answer Questions 21–28.</div>
+        </div>
+      `;
+      quiz.appendChild(imgbox);
+    }
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = `card-${idx}`;
+
+    let inner = `
+      <div class="qhead">
+        <div>
+          <div class="qnum">Question ${q.number}</div>
+          <div class="qtext">${escapeHtml(q.text)}</div>
+        </div>
+        <div class="badge">1 point</div>
+      </div>
+    `;
+
+    if (q.type === 'mcq') {
+      inner += `<div class="options">`;
+      q.options.forEach((opt, i) => {
+        const letter = String.fromCharCode(65 + i);
+        inner += `
+          <label class="option">
+            <input type="radio" name="q-${idx}" value="${i}">
+            <span class="letter">${letter}</span>
+            <span>${escapeHtml(opt)}</span>
+          </label>
+        `;
+      });
+      inner += `</div>`;
+    } else {
+      inner += `<input class="input-answer" id="input-${idx}" type="text" placeholder="Type your answer here">`;
+    }
+
+    inner += `
+      <div class="btnrow">
+        <button class="check" onclick="checkQuestion(${idx})">Check answer</button>
+        <button class="reset" onclick="clearQuestion(${idx})">Clear</button>
+      </div>
+      <div class="feedback" id="feedback-${idx}"></div>
+    `;
+
+    card.innerHTML = inner;
+    quiz.appendChild(card);
+  });
+}
+
+function normalizeInput(value) {
+  return value.toLowerCase().replace(/\s+/g, '').replace(/,/g, '').replace(/เมตร|m\.?$/g, 'm').trim();
+}
+
+function updateSummary() {
+  document.getElementById('scoreValue').textContent = String(score);
+  document.getElementById('answeredCount').textContent = `${checkedCount} / ${questions.length}`;
+  document.getElementById('progressText').textContent = `${checkedCount} of ${questions.length} checked`;
+}
+
+function showFeedback(idx, ok, message) {
+  const fb = document.getElementById(`feedback-${idx}`);
+  fb.className = `feedback ${ok ? 'correct' : 'incorrect'}`;
+  fb.innerHTML = message;
+}
+
+function checkQuestion(idx) {
+  const q = questions[idx];
+  let isCorrect = false;
+  let chosenText = '';
+
+  if (q.type === 'mcq') {
+    const selected = document.querySelector(`input[name="q-${idx}"]:checked`);
+    if (!selected) {
+      showFeedback(idx, false, `<strong>No answer selected.</strong><div>Please choose one option first.</div>`);
+      return;
+    }
+    const chosen = Number(selected.value);
+    chosenText = q.options[chosen];
+    isCorrect = chosen === q.answer;
+  } else {
+    const input = document.getElementById(`input-${idx}`);
+    const value = input.value.trim();
+    if (!value) {
+      showFeedback(idx, false, `<strong>No answer entered.</strong><div>Please type your answer first.</div>`);
+      return;
+    }
+    const normalized = normalizeInput(value);
+    const accepted = q.accept.map(normalizeInput);
+    isCorrect = accepted.includes(normalized);
+    chosenText = value;
+  }
+
+  if (!state[idx]) {
+    state[idx] = { checked: true, correct: isCorrect };
+    checkedCount += 1;
+    if (isCorrect) score += 1;
+  } else {
+    if (state[idx].correct !== isCorrect) {
+      score += isCorrect ? 1 : -1;
+      state[idx].correct = isCorrect;
+    }
+  }
+
+  let answerText = q.type === 'mcq' ? q.options[q.answer] : `${q.answer} m`;
+  const intro = isCorrect ? 'Correct' : 'Not quite';
+  const chosenLine = q.type === 'mcq' ? `You chose: <strong>${escapeHtml(chosenText)}</strong>.` : `You entered: <strong>${escapeHtml(chosenText)}</strong>.`;
+
+  showFeedback(
+    idx,
+    isCorrect,
+    `<strong>${intro}.</strong><div>${chosenLine}</div><div>Correct answer: <strong>${escapeHtml(answerText)}</strong>.</div><div style="margin-top:6px;">${escapeHtml(q.explanation)}</div>`
+  );
+
+  updateSummary();
+}
+
+function clearQuestion(idx) {
+  const q = questions[idx];
+  if (q.type === 'mcq') {
+    document.querySelectorAll(`input[name="q-${idx}"]`).forEach(el => el.checked = false);
+  } else {
+    document.getElementById(`input-${idx}`).value = '';
+  }
+  const fb = document.getElementById(`feedback-${idx}`);
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+}
+
+function checkAll() {
+  questions.forEach((_, idx) => {
+    try { checkQuestion(idx); } catch (e) {}
+  });
+}
+
+function resetQuiz() {
+  score = 0;
+  checkedCount = 0;
+  Object.keys(state).forEach(k => delete state[k]);
+  questions.forEach((_, idx) => clearQuestion(idx));
+  updateSummary();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+renderQuiz();
+updateSummary();
+</script>
+</body>
+</html>
